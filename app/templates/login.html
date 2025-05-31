@@ -1,0 +1,75 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="{% if category == 'success' %}success-message{% else %}error-message{% endif %}" style="margin-bottom: 1rem;">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<form method="POST">
+  {{ form.hidden_tag() }}
+  
+  <div style="margin-bottom:1rem;">
+    {{ form.username.label }}
+    {{ form.username(class_='input-field') }}
+    {% if form.username.errors %}
+      {% for error in form.username.errors %}
+        <div style="color: #f87171;">{{ error }}</div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <div style="margin-bottom:1rem;">
+    {{ form.password.label }}
+    {{ form.password(class_='input-field') }}
+    {% if form.password.errors %}
+      {% for error in form.password.errors %}
+        <div style="color: #f87171;">{{ error }}</div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <div>
+    {{ form.submit(class_='btn') }}
+  </div>
+</form>
+
+<style>
+  .success-message {
+    color: #22c55e;
+  }
+  .error-message {
+    color: #ef4444;
+  }
+  .input-field {
+    width: 100%;
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: none;
+    margin-top: 0.3rem;
+    font-size: 1rem;
+    background: #334155;
+    color: #f1f5f9;
+  }
+  .input-field:focus {
+    outline: 2px solid #60a5fa;
+    background: #1e293b;
+  }
+  .btn {
+    background-color: #3b82f6;
+    color: white;
+    padding: 0.7rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 1.1rem;
+    transition: background 0.2s;
+  }
+  .btn:hover {
+    background-color: #2563eb;
+  }
+</style>
+{% endblock %}
