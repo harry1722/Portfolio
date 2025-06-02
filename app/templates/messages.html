@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{%  block content %}
+<h1>Visitor Messages</h1> 
+
+{% if messages %}
+    <ul>
+        {% for msg in messages %}
+        <li>
+            <strong>{{ msg.name }} {{ msg.profession }}</strong> - {{ msg.timestamp.strftime('%Y-%m-%d %H:%M') }}
+            <p>{{ msg.message }}</p>
+        </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No messages yet.</p>
+ {% endif %}
+ {% endblock %}
+ 

@@ -1,14 +1,18 @@
-from flask import Flask
 import os
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from config import Config
+
+
 
 app = Flask(__name__)
-app.secret_key = 'tanismevjennemendjenjesecretkeyndajposhkruajkete'  
+app.config.from_object(Config)
 
-# Add this config here, right after app is created:
-app.config['UPLOAD_FOLDER'] = os.path.join(os.getcwd(), 'uploads')
+db = SQLAlchemy(app)
+migrate = Migrate(app,db)
 
-# Make sure uploads folder exists
+upload_folder = app.config['UPLOAD_FOLDER']
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
-
-from app import routes
+from app import routes,  models

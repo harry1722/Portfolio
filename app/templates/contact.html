@@ -35,19 +35,25 @@
     resize: vertical;
   }
   button {
-    padding: 10px 20px;
-    background: #007BFF;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  button:hover {
-    background: #0056b3;
-  }
-  ul.flashes {
+  display: inline-block;
+  width: 100%;           /* Bën button-in full width, si input-et */
+  padding: 12px 0;       /* Më shumë padding vertikal, për ta bërë më të madh */
+  background-color: #007BFF;
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;     /* Pak më i madh */
+  border: none;
+  border-radius: 8px;    /* Pak rounded më të mëdha */
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.4); /* Shadow i butë për theks */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+  box-shadow: 0 6px 12px rgba(0, 86, 179, 0.6);
+}
+ul.flashes {
     max-width: 500px;
     margin: 10px auto;
     padding: 0;
@@ -85,44 +91,49 @@
 {% endblock %}
 
 {% block content %}
-  <h1>Contact Me</h1>
+<h1>Contact Me</h1>
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <ul class="flashes">
-        {% for category, message in messages %}
-          <li class="{{ category }}">{{ message }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-  {% endwith %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class="flashes">
+      {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
 
-  <form method="POST" action="{{ url_for('contact') }}">
-    <label for="name">Name</label>
-    <input type="text" id="name" name="name" required />
+<form method="POST" action="{{ url_for('contact') }}">
+  {{ form.hidden_tag() }}
 
-    <label for="profession">Profession</label>
-    <input type="text" id="profession" name="profession" required />
+  <p>
+    {{ form.name.label }}<br>
+    {{ form.name(size=32) }}
+  </p>
+  <p>
+    {{ form.profession.label }}<br>
+    {{ form.profession(size=32) }}
+  </p>
+  <p>
+    {{ form.message.label }}<br>
+    {{ form.message(cols=40, rows=5) }}
+  </p>
+  <p>{{ form.submit() }}</p>
+</form>
 
-    <label for="message">Message</label>
-    <textarea id="message" name="message" rows="5" required></textarea>
-
-    <button type="submit">Send</button>
-  </form>
-
-  <div class="social-contact">
-    <p>Contact me on social media or email:</p>
-    <a href="mailto:your.email@example.com" target="_blank" rel="noopener" title="Email">
-      <i class="fas fa-envelope"></i>
-    </a>
-    <a href="https://instagram.com/yourprofile" target="_blank" rel="noopener" title="Instagram">
-      <i class="fab fa-instagram"></i>
-    </a>
-    <a href="https://wa.me/1234567890" target="_blank" rel="noopener" title="WhatsApp">
-      <i class="fab fa-whatsapp"></i>
-    </a>
-    <a href="https://github.com/yourusername" target="_blank" rel="noopener" title="GitHub">
-      <i class="fab fa-github"></i>
-    </a>
-  </div>
+<div class="social-contact">
+  <p>Contact me on social media or email:</p>
+  <a href="mailto:your.email@example.com" target="_blank" rel="noopener" title="Email">
+    <i class="fas fa-envelope"></i>
+  </a>
+  <a href="https://instagram.com/yourprofile" target="_blank" rel="noopener" title="Instagram">
+    <i class="fab fa-instagram"></i>
+  </a>
+  <a href="https://wa.me/1234567890" target="_blank" rel="noopener" title="WhatsApp">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+  <a href="https://github.com/yourusername" target="_blank" rel="noopener" title="GitHub">
+    <i class="fab fa-github"></i>
+  </a>
+</div>
 {% endblock %}

@@ -48,38 +48,12 @@
     border-radius: 6px;
     cursor: pointer;
     transition: background 0.2s;
+    text-decoration: none;
+    display: inline-block;
   }
 
   .view-btn:hover {
     background-color: #2563eb;
-  }
-
-  .file-list {
-    list-style: none;
-    padding-left: 1rem;
-    margin-top: 1rem;
-  }
-
-  .file-list li {
-    cursor: pointer;
-    margin: 0.3rem 0;
-    color: #94a3b8;
-  }
-
-  .file-list li:hover {
-    text-decoration: underline;
-  }
-
-  .file-content {
-    background-color: #0f172a;
-    border: 1px solid #334155;
-    border-radius: 6px;
-    padding: 1rem;
-    margin-top: 0.5rem;
-    font-size: 0.9rem;
-    color: #a7f3d0;
-    display: none;
-    overflow-x: auto;
   }
 
   /* Modal Styles */
@@ -100,6 +74,7 @@
     border-radius: 8px;
     max-width: 400px;
     width: 90%;
+    position: relative;
   }
 
   #projectModal h2 {
@@ -126,7 +101,8 @@
     font-size: 1rem;
   }
 
-  #projectModal button[type="submit"] {
+  #projectModal button[type="submit"],
+  .submit-btn {
     background: #3b82f6;
     color: white;
     border: none;
@@ -150,18 +126,32 @@
   }
 
   #openModalBtn {
-    font-size: 2rem; 
-    padding: 0.3rem 0.8rem; 
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 999;
+    font-size: 2rem;
+    padding: 0.5rem 1rem;
     cursor: pointer;
     background: #3b82f6;
     border: none;
     border-radius: 50%;
     color: white;
     transition: background 0.3s;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
   }
 
   #openModalBtn:hover {
     background: #2563eb;
+  }
+
+  .close-icon {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5rem;
+    color: #f87171;
+    cursor: pointer;
   }
 
   @media (max-width: 600px) {
@@ -182,88 +172,45 @@
     <button id="openModalBtn">＋</button>
   {% endif %}
 
-  <!-- Modal form për shtim projekti -->
-  <div id="projectModal" >
+  <!-- Modal -->
+  <div id="projectModal">
     <div>
+      <span class="close-icon" onclick="modal.style.display='none'">❌</span>
       <h2>Add New Project</h2>
-      <form method="POST" enctype="multipart/form-data" action="{{ url_for('add_project') }}">
-        <label for="name">Project Name</label>
-        <input type="text" name="name" id="name" required />
+      <form method="POST" enctype="multipart/form-data" action="{{ url_for('projects') }}">
+        {{ form.hidden_tag() }}
 
-        <label for="description">Description</label>
-        <textarea name="description" id="description" required></textarea>
+        <label for="{{ form.title.id }}">Project Name</label>
+        {{ form.title(class="input-field", id=form.title.id) }}
 
-        <label for="file">Upload File</label>
-        <input type="file" name="file" id="file" required />
+        <label for="{{ form.description.id }}">Description</label>
+        {{ form.description(class="input-field", id=form.description.id) }}
 
-        <button type="submit">Add Project</button>
+        <label for="{{ form.file.id }}">Upload File</label>
+        {{ form.file(class="input-field", id=form.file.id) }}
+
+        {{ form.submit(class="submit-btn") }}
       </form>
       <button id="closeModalBtn">Cancel</button>
     </div>
   </div>
 
-  <!-- Example Projects -->
-  <div class="project">
-    <h2>Hospital Management System</h2>
-    <p>A Flask-based web app for managing hospital patients and staff.</p>
-    <button class="view-btn" onclick="toggleFiles('proj1-files')">📂 View Files</button>
-
-    <ul id="proj1-files" class="file-list" style="display: none;">
-      <li onclick="toggleFileContent('file1')">📄 app/routes.py</li>
-      <div id="file1" class="file-content">
-<pre>
-@app.route('/patients')
-def patients():
-    return render_template('patients.html')
-</pre>
+  {% if projects %}
+    {% for project in projects %}
+      <div class="project">
+        <h2>{{ project.title }}</h2>
+        <p>{{ project.description }}</p>
+        {% if project.file_name %}
+          <a href="{{ url_for('static', filename='uploads/' + project.file_name) }}" class="view-btn" target="_blank">📂 View File</a>
+        {% endif %}
       </div>
-
-      <li onclick="toggleFileContent('file2')">📄 app/models.py</li>
-      <div id="file2" class="file-content">
-<pre>
-class Patient(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-</pre>
-      </div>
-    </ul>
-  </div>
-
-  <div class="project">
-    <h2>Portfolio Website</h2>
-    <p>A responsive portfolio site to showcase my work and skills.</p>
-    <button class="view-btn" onclick="toggleFiles('proj2-files')">📂 View Files</button>
-
-    <ul id="proj2-files" class="file-list" style="display: none;">
-      <li onclick="toggleFileContent('file3')">📄 index.html</li>
-      <div id="file3" class="file-content">
-<pre>
-&lt;!DOCTYPE html&gt;
-&lt;html lang="en"&gt;
-  &lt;head&gt;&lt;title&gt;Portfolio&lt;/title&gt;&lt;/head&gt;
-  &lt;body&gt;
-    &lt;h1&gt;Welcome!&lt;/h1&gt;
-  &lt;/body&gt;
-&lt;/html&gt;
-</pre>
-      </div>
-
-      <li onclick="toggleFileContent('file4')">📄 style.css</li>
-      <div id="file4" class="file-content">
-<pre>
-body {
-  background-color: #0f172a;
-  color: #f1f5f9;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-</pre>
-      </div>
-    </ul>
-  </div>
+    {% endfor %}
+  {% else %}
+    <p>No projects found yet.</p>
+  {% endif %}
 </div>
 
 <script>
-  // Modal open/close
   const openBtn = document.getElementById('openModalBtn');
   const modal = document.getElementById('projectModal');
   const closeBtn = document.getElementById('closeModalBtn');
@@ -281,16 +228,5 @@ body {
       modal.style.display = 'none';
     }
   });
-
-  // Toggle file list and file content
-  function toggleFiles(id) {
-    const section = document.getElementById(id);
-    section.style.display = section.style.display === 'none' ? 'block' : 'none';
-  }
-
-  function toggleFileContent(id) {
-    const file = document.getElementById(id);
-    file.style.display = file.style.display === 'none' ? 'block' : 'none';
-  }
 </script>
 {% endblock %}

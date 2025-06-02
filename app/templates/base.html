@@ -106,7 +106,7 @@
     <a href="{{ url_for('projects') }}">Projects</a>
 
     {% if session.get('user') == 'admin' %}
-        <a href="{{ url_for('admin_messages') }}">Messages</a>
+        <a href="{{ url_for('messages') }}">Messages</a>
         <a href="{{ url_for('logout') }}">Logout</a>
     {% else %}
         <a href="{{ url_for('contact') }}">Contact</a>
@@ -114,6 +114,30 @@
     {% endif %}
 </div>
     </div>
+    <div class="flash-messages" style="padding: 1rem 2rem;">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul style="list-style:none; padding:0;">
+        {% for category, message in messages %}
+          {# If we’re on home, show only 'info' flashes (like logout) #}
+          {% if request.endpoint == 'home' and category == 'info' %}
+            <li style="color: #00f7ff; margin-bottom: 0.5rem;">{{ message }}</li>
+          {# Elsewhere show all #}
+          {% elif request.endpoint != 'home' %}
+            <li 
+              style="
+                margin-bottom: 0.5rem; 
+                color: {% if category == 'success' %}#0f0{% elif category == 'danger' %}#f00{% else %}#00f7ff{% endif %};
+              ">
+              {{ message }}
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+</div>
+
 
     <div class="content">
         {% block content %}{% endblock %}

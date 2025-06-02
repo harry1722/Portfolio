@@ -1,8 +1,14 @@
-from flask import Flask, render_template,request,flash,redirect, session,url_for
-from app import app
-from app.forms import LoginForm
-from werkzeug.utils import secure_filename
 import os
+import time
+from flask import Flask, render_template, request, flash, redirect, session, url_for
+from app import app, db
+from app.models import Message, Project
+from app.forms import LoginForm, ContactForm, ProjectForm
+from werkzeug.utils import secure_filename
+
+ADMIN_USERNAME = os.getenv('ADMIN_USERNAME','admin')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD','password123')
+
 
 @app.route('/')
 def home():
@@ -12,28 +18,40 @@ def home():
 def about():
   return render_template('about.html')
 
-@app.route('/projects')
-def projects():
-  return  render_template('projects.html')
-
 @app.route('/contact', methods=['GET','POST'])
 def contact():
-   if request.method == 'POST':
-      name = request.form.get('name')
-      profession = request.form.get('profession')
-      message = request.form.get('message')
+  form = ContactForm()
+  if form.validate_on_submit():
+       # Merr të dhënat nga forma
+    try:
+      name = form.name.data
+      profession = form.profession.data   # ruaje me të njëjtin spelling si në formë!
+      message = form.message.data
 
-      flash('I got your message.Thank you!', 'success')
-      return redirect(url_for('contact'))
+      # Ruaj në DB
+      new_message = Message(name=name, profession=profession, message=message)
+      db.session.add(new_message)
+      db.session.commit()
+
+      flash('I got your message. Thank you!', 'success')
+      return redirect(url_for('send_messages'))
+    except Exception as e:
+        db.session.rollback()
+        flash('Oops, something went wrong while saving your message. Try again!', 'danger')
+        print(f"DB Error: {e}")
+
+  return render_template('contact.html', form=form)
    
-   return render_template('contact.html')
-@app.route('/admin/projects')
-def admin_projects():
-  return  render_template('admin_projects.html')
 
-@app.route('/admin/messages')
-def admin_messages():
-  return  render_template('admin_messages.html')
+    
+@app.route('/messages')
+def messages():
+   if session.get('user') != 'admin':
+      flash("Access denied", "danger")
+      return redirect(url_for('login'))
+   
+   messages = Message.query.order_by(Message.timestamp.desc()).all()
+   return render_template('messages.html', messages=messages)
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -47,7 +65,7 @@ def login():
      password = form.password.data
 
      #for database
-     if username == 'admin' and password == 'password123':
+     if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
         session['user'] = username
         flash('You are the right admin!','success')
         return redirect(url_for('home'))
@@ -62,29 +80,48 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('home'))
 
-from flask import request, redirect, url_for, flash, session
 
-@app.route('/add_project', methods=['POST'])
-def add_project():
-    if session.get('user') != 'admin':
-        flash("Access denied", "danger")
-        return redirect(url_for('projects'))
-    
-    name = request.form.get('name')
-    description = request.form.get('description')
-    file = request.files.get('file')
 
-    if not (name and description and file):
-        flash("All fields are required!", "danger")
-        return redirect(url_for('projects'))
+@app.route('/projects', methods=['GET','POST'])
+def projects():
+   form=ProjectForm()
 
-    # Save the file
-    filename = secure_filename(file.filename)
-    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+   if form.validate_on_submit():
+      if session.get('user') != 'admin':
+         flash('Access denied', 'danger')
+         return redirect(url_for('projects'))
+      
+      name = form.title.data
+      description = form.description.data
+      file  =  form.file.data
 
-    # Save project info to db here (if you use a db)
-    # Example: Project(name=name, description=description, filename=filename)
+      if not file:
+         flash("File is required","danger")
+         return redirect(url_for('projects'))
+      
+      filename = f"{int(time.time())}_{secure_filename(file.filename)}"
+      upload_folder = app.config.get('UPLOAD_FOLDER','static/uploads')
+      os.makedirs(upload_folder, exist_ok=True)
+      file_path  =  os.path.join(upload_folder,filename)
+      file.save(file_path)
 
-    flash("Project added successfully!", "success")
-    return redirect(url_for('projects'))
+      new_project = Project(
+         
+         title=name,
+         description=description,
+         file_name=filename
+      )
+      try:
+         db.session.add(new_project)
+         db.session.commit()
+         flash("Project added successfully!",'success')
+      except Exception as e:
+         db.session.rollback()
+         flash("Failed to add project. Try again",'danger')
+         print(f"DB Error; {e}")
+      return redirect(url_for('projects'))
+   
+   all_projects = Project.query.order_by(Project.id.desc()).all()
+   return render_template('projects.html', projects=all_projects, form=form)
 
+ 
