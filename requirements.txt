@@ -3,5 +3,6 @@ Flask-WTF==1.2.1
 mysql-connector-python
 python-dotenv==1.0.1
 flask_sqlalchemy
+flask_migrate
 gunicorn
 Werkzeug
