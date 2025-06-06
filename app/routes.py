@@ -100,9 +100,9 @@ def projects():
          return redirect(url_for('projects'))
       
       filename = f"{int(time.time())}_{secure_filename(file.filename)}"
-      upload_folder = app.config.get('UPLOAD_FOLDER','static/uploads')
+      upload_folder = app.config['UPLOAD_FOLDER']
       os.makedirs(upload_folder, exist_ok=True)
-      file_path  =  os.path.join(upload_folder,filename)
+      file_path = os.path.join(upload_folder, filename)
       file.save(file_path)
 
       new_project = Project(
@@ -124,4 +124,39 @@ def projects():
    all_projects = Project.query.order_by(Project.id.desc()).all()
    return render_template('projects.html', projects=all_projects, form=form)
 
+@app.route('/projects/edit/<int:project_id>', methods=['GET', 'POST'])
+def edit_project(project_id):
+   if session.get('user')!='admin':
+      flash('Access denier','danger')
+      return redirect(url_for('projects'))
  
+   project = Project.query.get_or_404(project_id)
+   form = ProjectForm(obj=project)
+
+   if form.validate_on_submit():
+        project.title = form.title.data
+        project.description = form.description.data
+        db.session.commit()
+        flash('Project updated!', 'success')
+        return redirect(url_for('projects'))
+
+   return render_template('edit_project.html', form=form, project=project)
+
+@app.route('/projects/delete/<int:project_id>')
+def delete_project(project_id):
+   if session.get('user') != 'admin':
+        flash('Access denied', 'danger')
+        return redirect(url_for('projects'))
+
+   project = Project.query.get_or_404(project_id)
+   try:
+      db.session.delete(project)
+      db.session.commit()
+      flash('Project deleted!','success')
+   except Exception as e:
+      db.session.rollback()
+      flash('Failed to delete prject!','danger')
+      print(f"Error deleting project:{e}")
+
+   return redirect(url_for('projects'))
+

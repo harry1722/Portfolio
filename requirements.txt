@@ -1,4 +1,8 @@
 Flask==3.0.3
-mysql-connector-python
 Flask-WTF==1.2.1
+mysql-connector-python
 python-dotenv==1.0.1
+gunicorn
+Werkzeug
+pip freeze > requirements.txt
+
