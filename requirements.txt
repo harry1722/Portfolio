@@ -4,5 +4,3 @@ mysql-connector-python
 python-dotenv==1.0.1
 gunicorn
 Werkzeug
-pip freeze > requirements.txt
-
