@@ -175,7 +175,7 @@
   <!-- Modal -->
   <div id="projectModal">
     <div>
-      <span class="close-icon" onclick="modal.style.display='none'">❌</span>
+      <span class="close-icon" id="closeIcon">❌</span>
       <h2>Add New Project</h2>
       <form method="POST" enctype="multipart/form-data" action="{{ url_for('projects') }}">
         {{ form.hidden_tag() }}
@@ -233,12 +233,17 @@
   const openBtn = document.getElementById('openModalBtn');
   const modal = document.getElementById('projectModal');
   const closeBtn = document.getElementById('closeModalBtn');
+  const closeIcon = document.getElementById('closeIcon');
 
   openBtn?.addEventListener('click', () => {
     modal.style.display = 'flex';
   });
 
   closeBtn?.addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
+
+  closeIcon?.addEventListener('click', () => {
     modal.style.display = 'none';
   });
 

@@ -6,9 +6,10 @@ from app.models import Message, Project
 from app.forms import LoginForm, ContactForm, ProjectForm
 from werkzeug.utils import secure_filename
 
-ADMIN_USERNAME = os.getenv('ADMIN_USERNAME','admin')
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD','password123')
+ALLOWED_EXTENSIONS ={'pdf', 'docx', 'txt','png','jpg', 'jpeg'}
 
+def allowed_files(filename):
+   return '.' in filename and filename.rsplit('.',1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def home():
@@ -41,9 +42,7 @@ def contact():
         print(f"DB Error: {e}")
 
   return render_template('contact.html', form=form)
-   
-
-    
+      
 @app.route('/messages')
 def messages():
    if session.get('user') != 'admin':
@@ -67,10 +66,10 @@ def login():
      #for database
      if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
         session['user'] = username
-        flash('You are the right admin!','success')
+        flash('Welcome back, admin!','success')
         return redirect(url_for('home'))
      else:
-        flash('Wait!You are not the right admin','danger')
+        flash('Incorrect username or password','danger')
 
   return  render_template("login.html", form=form)
 
@@ -79,8 +78,6 @@ def logout():
     session.pop('user', None)
     flash('You have been logged out.', 'info')
     return redirect(url_for('home'))
-
-
 
 @app.route('/projects', methods=['GET','POST'])
 def projects():
@@ -91,12 +88,12 @@ def projects():
          flash('Access denied', 'danger')
          return redirect(url_for('projects'))
       
-      name = form.title.data
+      title = form.title.data
       description = form.description.data
       file  =  form.file.data
 
-      if not file:
-         flash("File is required","danger")
+      if not file or not allowed_files(file.filename) or file.filename=='':
+         flash("Only certain file types are allowed!","danger")
          return redirect(url_for('projects'))
       
       filename = f"{int(time.time())}_{secure_filename(file.filename)}"
@@ -106,8 +103,7 @@ def projects():
       file.save(file_path)
 
       new_project = Project(
-         
-         title=name,
+         title=title,
          description=description,
          file_name=filename
       )
@@ -127,7 +123,7 @@ def projects():
 @app.route('/projects/edit/<int:project_id>', methods=['GET', 'POST'])
 def edit_project(project_id):
    if session.get('user')!='admin':
-      flash('Access denier','danger')
+      flash('Access denied','danger')
       return redirect(url_for('projects'))
  
    project = Project.query.get_or_404(project_id)
@@ -155,7 +151,7 @@ def delete_project(project_id):
       flash('Project deleted!','success')
    except Exception as e:
       db.session.rollback()
-      flash('Failed to delete prject!','danger')
+      flash('Failed to delete project!','danger')
       print(f"Error deleting project:{e}")
 
    return redirect(url_for('projects'))
