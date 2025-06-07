@@ -6,7 +6,7 @@ class Message(db.Model):
     name = db.Column(db.String(100), nullable=False)
     profession = db.Column(db.String(100), nullable=False)
     message = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    Time = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Project(db.Model):
      id = db.Column(db.Integer, primary_key=True)
