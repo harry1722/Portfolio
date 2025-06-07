@@ -19,7 +19,9 @@ class ProjectForm(FlaskForm):
     title = StringField('Project Title', validators=[DataRequired(), Length(max=120)])
     description = TextAreaField('Description', validators=[DataRequired(), Length(max=300)])
     file = FileField('Project File', validators=[
-        FileRequired(),
+        FileAllowed(['zip','pdf','py','txt','html','css','js'],'Only zip,pdf,py,txt,html,css are allowed!')
+    ])
+    folder = FileField('Folder Upload', render_kw={'multiple': True}, validators=[
         FileAllowed(['zip','pdf','py','txt','html','css','js'],'Only zip,pdf,py,txt,html,css are allowed!')
     ])
     submit = SubmitField('Add Project')

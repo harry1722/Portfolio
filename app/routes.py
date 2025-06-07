@@ -84,16 +84,15 @@ def logout():
     session.pop('user', None)
     flash('You have been logged out.', 'info')
     return redirect(url_for('home'))
-
 @app.route('/projects', methods=['GET', 'POST'])
 def projects():
     form = ProjectForm()
 
-    if form.validate_on_submit():
-        if session.get('user') != 'admin':
-            flash('Access denied', 'danger')
-            return redirect(url_for('projects'))
+    if session.get('user') != 'admin':
+        flash('Access denied', 'danger')
+        return redirect(url_for('projects'))
 
+    if form.validate_on_submit():
         title = form.title.data
         description = form.description.data
 
@@ -102,7 +101,7 @@ def projects():
 
         if 'file' in request.files and request.files['file'].filename != '':
             file = request.files['file']
-            if not allowed_files(file.filename):
+            if not allowed_file(file.filename):
                 flash("Only certain file types are allowed!", 'danger')
                 return redirect(url_for('projects'))
 
@@ -128,22 +127,24 @@ def projects():
         elif 'folder' in request.files:
             folder_files = request.files.getlist('folder')
             timestamp = int(time.time())
-            folder_upload_path = os.path.join(upload_folder, f"{timestamp}_{secure_filename(title)}")
+            safe_folder_name = secure_filename(title).replace(' ', '_')
+            folder_upload_path = os.path.join(upload_folder, f"{timestamp}_{safe_folder_name}")
             os.makedirs(folder_upload_path, exist_ok=True)
 
             saved_files = []
             for f in folder_files:
-                if f and allowed_files(f.filename):
-                    filename = secure_filename(f.filename)
-                    file_path = os.path.join(folder_upload_path, filename)
-                    f.save(file_path)
+                if f and allowed_file(f.filename):
+                    filename = f.filename  # this includes subfolder path relative to upload
+                    full_path = os.path.join(folder_upload_path, filename)
+                    os.makedirs(os.path.dirname(full_path), exist_ok=True)
+                    f.save(full_path)
                     saved_files.append(filename)
 
             new_project = Project(
                 title=title,
                 description=description,
                 file_name=None,
-                folder_name=f"{timestamp}_{secure_filename(title)}"
+                folder_name=f"{timestamp}_{safe_folder_name}"
             )
             try:
                 db.session.add(new_project)
@@ -160,11 +161,8 @@ def projects():
 
         return redirect(url_for('projects'))
 
-    # For GET or if form not valid, show all projects
     all_projects = Project.query.order_by(Project.id.desc()).all()
     return render_template('projects.html', projects=all_projects, form=form)
-   
-   
 
 
 @app.route('/projects/edit/<int:project_id>', methods=['GET', 'POST'])
