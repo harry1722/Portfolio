@@ -7,4 +7,5 @@ flask_migrate
 gunicorn
 Werkzeug
 pymysql
-psycopg2
+psycopg2-binary
+flask-wtf

@@ -14,4 +14,4 @@ migrate = Migrate(app,db)
 upload_folder = app.config['UPLOAD_FOLDER']
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
-from app import routes,  models
+from app import routes, models
