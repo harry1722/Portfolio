@@ -50,7 +50,7 @@ def messages():
       flash("Access denied", "danger")
       return redirect(url_for('login'))
    
-   messages = Message.query.order_by(Message.timestamp.desc()).all()
+   messages = Message.query.order_by(Message.Time.desc()).all()
    return render_template('messages.html', messages=messages)
 
 @app.errorhandler(404)
