@@ -101,7 +101,7 @@ def projects():
 
         if 'file' in request.files and request.files['file'].filename != '':
             file = request.files['file']
-            if not allowed_file(file.filename):
+            if not allowed_files(file.filename):
                 flash("Only certain file types are allowed!", 'danger')
                 return redirect(url_for('projects'))
 
@@ -133,7 +133,7 @@ def projects():
 
             saved_files = []
             for f in folder_files:
-                if f and allowed_file(f.filename):
+                if f and allowed_files(f.filename):
                     filename = f.filename  # this includes subfolder path relative to upload
                     full_path = os.path.join(folder_upload_path, filename)
                     os.makedirs(os.path.dirname(full_path), exist_ok=True)
