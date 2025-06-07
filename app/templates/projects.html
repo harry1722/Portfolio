@@ -163,11 +163,6 @@
       font-size: 2rem;
     }
   }
-  .upload-type-btn.active {
-  background-color: #2563eb;
-  color: white;
-  }
-
 </style>
 
 <div class="container">
@@ -190,23 +185,12 @@
 
         <label for="{{ form.description.id }}">Description</label>
         {{ form.description(class="input-field", id=form.description.id) }}
-        <!--Upload type buttons-->
-        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-          <button type="button" id="fileBtn" class="upload-type-btn active">Upload File</button>
-          <button type="button" id="folderBtn" class="upload-type-btn">Upload Folder</button>
-        </div>
-        <!--File input-->
-        <div id="fileUploadDiv">
-           <label for="{{ form.file.id }}">Upload File</label>
-            {{ form.file(class="input-field", id=form.file.id) }}
-        </div>
-        <!--Folder input-->
-        <div id="folderUploadDiv" style="display:none;">
-          <label for="folderInput">Upload folder</label>
-          <input type="file" id="folderInput" name="folder" class="input-field" webkitdirectory directory multiple >
-        </div>
-          {{ form.submit(class="submit-btn") }}
-        </form>
+
+        <label for="{{ form.file.id }}">Upload File</label>
+        {{ form.file(class="input-field", id=form.file.id) }}
+
+        {{ form.submit(class="submit-btn") }}
+      </form>
       <button id="closeModalBtn">Cancel</button>
     </div>
   </div>
@@ -268,26 +252,5 @@
       modal.style.display = 'none';
     }
   });
-
-  const fileBtn = document.getElementById('fileBtn');
-  const folderBtn = document.getElementById('folderBtn');
-  const fileUploadDiv = document.getElementById('fileUploadDiv');
-  const folderUploadDiv = document.getElementById('folderUploadDiv');
-
-
-  fileBtn.addEventListener('click', () => {
-    fileUploadDiv.style.display = 'block';
-    folderUploadDiv.style.display = 'none';
-    fileBtn.classList.add('active');
-    folderBtn.classList.remove('active');
-  });
-
-  folderBtn.addEventListener('click', () => {
-    fileUploadDiv.style.display = 'none';
-    folderUploadDiv.style.display = 'block';
-    folderBtn.classList.add('active');
-    fileBtn.classList.remove('active');
-  });
-
 </script>
-{% endblock %}
+{% endblock %}  e bera keshtu
