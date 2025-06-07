@@ -100,7 +100,6 @@ def projects():
         upload_folder = app.config['UPLOAD_FOLDER']
         os.makedirs(upload_folder, exist_ok=True)
 
-        # Single file upload
         if 'file' in request.files and request.files['file'].filename != '':
             file = request.files['file']
             if not allowed_files(file.filename):
@@ -126,8 +125,7 @@ def projects():
                 flash("Failed to add project. Try again", 'danger')
                 print(f"DB Error: {e}")
 
-        # Folder upload
-        elif 'folder' in request.files and request.files.getlist('folder'):
+        elif 'folder' in request.files:
             folder_files = request.files.getlist('folder')
             timestamp = int(time.time())
             folder_upload_path = os.path.join(upload_folder, f"{timestamp}_{secure_filename(title)}")
@@ -136,11 +134,8 @@ def projects():
             saved_files = []
             for f in folder_files:
                 if f and allowed_files(f.filename):
-                    # Save file, filename might include subfolder structure like subdir/file.txt
                     filename = secure_filename(f.filename)
                     file_path = os.path.join(folder_upload_path, filename)
-                    # Ensure subfolders exist
-                    os.makedirs(os.path.dirname(file_path), exist_ok=True)
                     f.save(file_path)
                     saved_files.append(filename)
 
@@ -165,12 +160,10 @@ def projects():
 
         return redirect(url_for('projects'))
 
-    # GET or invalid form - show projects
+    # For GET or if form not valid, show all projects
     all_projects = Project.query.order_by(Project.id.desc()).all()
     return render_template('projects.html', projects=all_projects, form=form)
    
-   
-
    
 
 
