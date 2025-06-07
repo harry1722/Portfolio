@@ -34,7 +34,7 @@ def contact():
       db.session.commit()
 
       flash('I got your message. Thank you!', 'success')
-      return redirect(url_for('send_messages'))
+      return redirect(url_for('contact'))
     except Exception as e:
         db.session.rollback()
         flash('Oops, something went wrong while saving your message. Try again!', 'danger')
