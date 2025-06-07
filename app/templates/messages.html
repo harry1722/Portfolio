@@ -7,7 +7,7 @@
     <ul>
         {% for msg in messages %}
         <li>
-            <strong>{{ msg.name }} {{ msg.profession }}</strong> - {{ msg.time.strftime('%Y-%m-%d %H:%M') }}
+            <strong>{{ msg.name }} {{ msg.profession }}</strong> - {{ msg.Time.strftime('%Y-%m-%d %H:%M') }}
             <p>{{ msg.message }}</p>
         </li>
         {% endfor %}
