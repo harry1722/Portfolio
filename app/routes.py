@@ -5,7 +5,13 @@ from app import app, db
 from app.models import Message, Project
 from app.forms import LoginForm, ContactForm, ProjectForm
 from werkzeug.utils import secure_filename
+from dotenv import load_dotenv
 
+load_dotenv()
+
+
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 ALLOWED_EXTENSIONS ={'pdf', 'docx', 'txt','png','jpg', 'jpeg'}
 
 def allowed_files(filename):
@@ -79,46 +85,89 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('home'))
 
-@app.route('/projects', methods=['GET','POST'])
+@app.route('/projects', methods=['GET', 'POST'])
 def projects():
-   form=ProjectForm()
+    form = ProjectForm()
 
-   if form.validate_on_submit():
-      if session.get('user') != 'admin':
-         flash('Access denied', 'danger')
-         return redirect(url_for('projects'))
-      
-      title = form.title.data
-      description = form.description.data
-      file  =  form.file.data
+    if form.validate_on_submit():
+        if session.get('user') != 'admin':
+            flash('Access denied', 'danger')
+            return redirect(url_for('projects'))
 
-      if not file or not allowed_files(file.filename) or file.filename=='':
-         flash("Only certain file types are allowed!","danger")
-         return redirect(url_for('projects'))
-      
-      filename = f"{int(time.time())}_{secure_filename(file.filename)}"
-      upload_folder = app.config['UPLOAD_FOLDER']
-      os.makedirs(upload_folder, exist_ok=True)
-      file_path = os.path.join(upload_folder, filename)
-      file.save(file_path)
+        title = form.title.data
+        description = form.description.data
 
-      new_project = Project(
-         title=title,
-         description=description,
-         file_name=filename
-      )
-      try:
-         db.session.add(new_project)
-         db.session.commit()
-         flash("Project added successfully!",'success')
-      except Exception as e:
-         db.session.rollback()
-         flash("Failed to add project. Try again",'danger')
-         print(f"DB Error; {e}")
-      return redirect(url_for('projects'))
+        upload_folder = app.config['UPLOAD_FOLDER']
+        os.makedirs(upload_folder, exist_ok=True)
+
+        if 'file' in request.files and request.files['file'].filename != '':
+            file = request.files['file']
+            if not allowed_files(file.filename):
+                flash("Only certain file types are allowed!", 'danger')
+                return redirect(url_for('projects'))
+
+            filename = f"{int(time.time())}_{secure_filename(file.filename)}"
+            file_path = os.path.join(upload_folder, filename)
+            file.save(file_path)
+
+            new_project = Project(
+                title=title,
+                description=description,
+                file_name=filename,
+                folder_name=None
+            )
+            try:
+                db.session.add(new_project)
+                db.session.commit()
+                flash("Project added successfully!", 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash("Failed to add project. Try again", 'danger')
+                print(f"DB Error: {e}")
+
+        elif 'folder' in request.files:
+            folder_files = request.files.getlist('folder')
+            timestamp = int(time.time())
+            folder_upload_path = os.path.join(upload_folder, f"{timestamp}_{secure_filename(title)}")
+            os.makedirs(folder_upload_path, exist_ok=True)
+
+            saved_files = []
+            for f in folder_files:
+                if f and allowed_files(f.filename):
+                    filename = secure_filename(f.filename)
+                    file_path = os.path.join(folder_upload_path, filename)
+                    f.save(file_path)
+                    saved_files.append(filename)
+
+            new_project = Project(
+                title=title,
+                description=description,
+                file_name=None,
+                folder_name=f"{timestamp}_{secure_filename(title)}"
+            )
+            try:
+                db.session.add(new_project)
+                db.session.commit()
+                flash("Folder uploaded and project added successfully", 'success')
+            except Exception as e:
+                db.session.rollback()
+                flash("Failed to add project. Try again", 'danger')
+                print(f"DB error: {e}")
+
+        else:
+            flash("No file or folder uploaded", 'danger')
+            return redirect(url_for('projects'))
+
+        return redirect(url_for('projects'))
+
+    # For GET or if form not valid, show all projects
+    all_projects = Project.query.order_by(Project.id.desc()).all()
+    return render_template('projects.html', projects=all_projects, form=form)
    
-   all_projects = Project.query.order_by(Project.id.desc()).all()
-   return render_template('projects.html', projects=all_projects, form=form)
+   
+
+   
+
 
 @app.route('/projects/edit/<int:project_id>', methods=['GET', 'POST'])
 def edit_project(project_id):

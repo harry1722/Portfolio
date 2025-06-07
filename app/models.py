@@ -13,3 +13,4 @@ class Project(db.Model):
      title = db.Column(db.String(120), nullable=False)
      description = db.Column(db.String(300), nullable=False)
      file_name = db.Column(db.String(100),nullable=False)
+     folder_name = db.Column(db.String(100), nullable=True)
