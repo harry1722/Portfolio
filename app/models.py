@@ -9,8 +9,8 @@ class Message(db.Model):
     Time = db.Column(db.DateTime, default=datetime.utcnow)
 
 class Project(db.Model):
-     id = db.Column(db.Integer, primary_key=True)
-     title = db.Column(db.String(120), nullable=False)
-     description = db.Column(db.String(300), nullable=False)
-     file_name = db.Column(db.String(100),nullable=False)
-     folder_name = db.Column(db.String(100), nullable=True)
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.String(300), nullable=False)
+    file_name = db.Column(db.String(100), nullable=False)
+    folder_name = db.Column(db.String(100), nullable=True)
