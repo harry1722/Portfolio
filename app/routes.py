@@ -5,20 +5,18 @@ from app import app, db
 from app.models import Message, Project
 from app.forms import LoginForm, ContactForm, ProjectForm
 from werkzeug.utils import secure_filename
-
 from dotenv import load_dotenv
-import os
 
-load_dotenv()  # this loads variables from .env into os.environ
-ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
+load_dotenv()
 
+
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 ALLOWED_EXTENSIONS ={'pdf', 'docx', 'txt','png','jpg', 'jpeg'}
 
 def allowed_files(filename):
    return '.' in filename and filename.rsplit('.',1)[1].lower() in ALLOWED_EXTENSIONS
-
 
 @app.route('/')
 def home():
@@ -87,8 +85,6 @@ def logout():
     session.pop('user', None)
     flash('You have been logged out.', 'info')
     return redirect(url_for('home'))
-
-
 
 @app.route('/projects', methods=['GET','POST'])
 def projects():
